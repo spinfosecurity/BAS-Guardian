@@ -106,3 +106,13 @@ Both versions deliver identical scanning logic, vendor fingerprinting, and repor
 
 ## Sample Output
 
+```text
+[2026-08-03 21:14:02] [CRITICAL] 10.0.5.42:47808  BACnet/IP exposed — Honeywell IQ4x fingerprint detected (CVE-2026-3611, CVSS 10.0)
+[2026-08-03 21:14:05] [HIGH]     10.0.5.55:1911   Tridium Niagara Fox protocol reachable
+[2026-08-03 21:14:07] [HIGH]     10.0.5.61:3389   RDP exposed on BAS subnet — restrict remote access immediately
+[2026-08-03 21:14:09] [MEDIUM]   10.0.5.70:22     SSH reachable — review access policy
+
+Scan complete. Findings: 4 (1 CRITICAL, 2 HIGH, 1 MEDIUM)
+Report saved: ./reports/BAS-Guardian-20260803-211409.csv
+```
+
