@@ -6,10 +6,12 @@
 [![PowerShell](https://img.shields.io/badge/PowerShell-5.1%2B-blue.svg)](https://docs.microsoft.com/en-us/powershell/)
 [![Bash](https://img.shields.io/badge/Bash-4.0%2B-green.svg)](https://www.gnu.org/software/bash/)
 [![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20Linux%20%7C%20macOS-lightgrey.svg)]()
+[![CISA Aligned](https://img.shields.io/badge/CISA-ICS%20Advisories%20Aligned-red)](#)
+[![CVE-2026-3611](https://img.shields.io/badge/CVE--2026--3611-CVSS%2010.0-critical)](#)
 [![Maintained](https://img.shields.io/badge/Maintained-Yes-brightgreen.svg)]()
-[![GitHub issues](https://img.shields.io/github/issues/spinfosecurity/building_automation_system_guardian)](https://github.com/spinfosecurity/building_automation_system_guardian/issues)
-[![GitHub last commit](https://img.shields.io/github/last-commit/spinfosecurity/building_automation_system_guardian)](https://github.com/spinfosecurity/building_automation_system_guardian/commits/main)
-[![GitHub stars](https://img.shields.io/github/stars/spinfosecurity/building_automation_system_guardian?style=social)](https://github.com/spinfosecurity/building_automation_system_guardian/stargazers)
+[![GitHub issues](https://img.shields.io/github/issues/spinfosecurity/BAS-Guardian)](https://github.com/spinfosecurity/BAS-Guardian/issues)
+[![GitHub last commit](https://img.shields.io/github/last-commit/spinfosecurity/BAS-Guardian)](https://github.com/spinfosecurity/BAS-Guardian/commits/main)
+[![GitHub stars](https://img.shields.io/github/stars/spinfosecurity/BAS-Guardian?style=social)](https://github.com/spinfosecurity/BAS-Guardian/stargazers)
 
 ---
 
@@ -24,10 +26,13 @@
 - [Sample Output](#sample-output)
 - [What This Does NOT Do](#what-this-does-not-do)
 - [Repository Structure](#repository-structure)
+- [FAQ](#faq)
+- [Who This Is For](#who-this-is-for)
 - [Documentation](#documentation)
 - [Technical Specifications](#technical-specifications)
 - [Contributing](#contributing)
 - [Issues & Support](#issues--support)
+- [Support This Project](#support-this-project)
 - [References](#references)
 - [License](#license)
 - [Disclaimer](#disclaimer)
@@ -59,7 +64,7 @@ Smart buildings run on decades-old industrial protocols that were never designed
 - **Fingerprints vendor-specific platforms**: Honeywell IQ4x, Johnson Controls C-CURE 9000/Victor, Siemens Desigo CC/SENTRON Powermanager
 - **Flags critical vendor CVEs** including CVE-2026-3611 (CVSS 10.0) and CVE-2026-24060
 - **Prioritizes findings by severity** (CRITICAL vs HIGH)
-- **Generates simple text reports** for sharing with facilities and IT teams
+- **Generates simple text/CSV reports** for sharing with facilities and IT teams
 - **Runs on Windows, Linux, and macOS** via matching PowerShell and Bash implementations
 
 ## Real-World Threat Intelligence
@@ -116,3 +121,111 @@ Scan complete. Findings: 4 (1 CRITICAL, 2 HIGH, 1 MEDIUM)
 Report saved: ./reports/BAS-Guardian-20260803-211409.csv
 ```
 
+## What This Does NOT Do
+
+- ❌ **Does NOT exploit vulnerabilities** — detection and reporting only
+- ❌ **Does NOT modify BAS device configurations** — scans are read-only and non-intrusive
+- ❌ **Does NOT replace professional BAS security assessments**
+- ❌ **Does NOT guarantee compliance** with ASHRAE 135, NIST CSF, or any regulatory framework
+
+## Repository Structure
+
+```
+BAS-Guardian/
+├── README.md
+├── LICENSE
+├── CONTRIBUTING.md
+├── SECURITY.md
+├── reports/
+├── scripts/
+│   ├── powershell/
+│   │   └── BAS-Guardian.ps1
+│   └── bash/
+│       └── BAS-Guardian.sh
+└── docs/
+```
+
+---
+
+## FAQ
+
+**Q: Does BAS Guardian require admin/root privileges?**  
+A: No. It uses standard TCP connections only. No raw sockets required.
+
+**Q: Can I run this without coordinating with building operations?**  
+A: No. BACnet scanning can disrupt active controllers. Always coordinate with your facilities team and obtain written authorization before scanning any production BAS network.
+
+**Q: Does it exploit CVE-2026-3611?**  
+A: No. It detects whether the Honeywell IQ4x BACnet port is reachable. It does not attempt authentication bypass or exploit any vulnerability.
+
+**Q: Can I export results to a CMMS or work order system?**  
+A: Yes. CSV output can be imported into Maximo, ServiceNow Facilities, or any CMMS that accepts CSV. JSON output is available for SIEM ingestion.
+
+**Q: Is this useful for data center or hospital facility teams?**  
+A: Yes — any environment running BACnet, Tridium Niagara, or similar BMS protocols is in scope.
+
+**Q: Is it free for commercial facility management use?**  
+A: Yes — MIT License.
+
+---
+
+## Who This Is For
+
+- **Facility managers and building engineers** responsible for HVAC/BMS cybersecurity
+- **Hospital and healthcare IT/OT teams** managing critical building infrastructure
+- **Data center operations teams** securing BMS and cooling systems
+- **Government and federal facility security officers** (FSOs)
+- **ICS/OT security consultants** adding BAS assessments to their service portfolio
+- **Smart building integrators** validating security posture of new BAS deployments
+
+---
+
+## Documentation
+
+Detailed documentation for scan modes, vendor fingerprinting, and report formats will be added to the `docs/` folder in future releases.
+
+## Technical Specifications
+
+- **Supported OS**: Windows 10/11, Linux, macOS
+- **PowerShell**: 5.1+ or 7.0+ (Core)
+- **Bash**: 4.0+
+- **Network Requirements**: Access to BAS subnet (typically a separate VLAN)
+- **Privileges**: Standard user; no elevation required for basic scanning
+
+## Contributing
+
+Contributions are welcome! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines. For security issues in the tool itself, see [SECURITY.md](./SECURITY.md).
+
+## Issues & Support
+
+Found a bug? [Open an issue](https://github.com/spinfosecurity/BAS-Guardian/issues). For security vulnerabilities in this tool, see [SECURITY.md](./SECURITY.md).
+
+---
+
+## ⭐ Support This Project
+
+If BAS Guardian helped you find a real exposure in your building infrastructure, consider:
+
+- ⭐ **Starring this repo** — it helps other facility security teams find it
+- 🐛 **Opening an issue** if you find a bug or want a new vendor/CVE added
+- 🤝 **Contributing** — see [CONTRIBUTING.md](./CONTRIBUTING.md)
+- 💬 **Sharing** with your facilities team, building integrator, or OT security network
+
+> Built by [@spinfosecurity](https://github.com/spinfosecurity) — learning by building free tools that detect and protect critical infrastructure.
+
+---
+
+## References
+
+- CISA ICS Advisories: [https://www.cisa.gov/ics](https://www.cisa.gov/ics)
+- ASHRAE Standard 135 (BACnet): [https://www.ashrae.org/standards-research--technology/standards--guidelines/titles-purposes-and-scopes/ashrae-standing-standard-project-committee-135](https://www.ashrae.org/)
+- Tridium Niagara Security: [https://www.tridium.com/us/en/support/cybersecurity](https://www.tridium.com/)
+- [Security Policy](./SECURITY.md)
+
+## License
+
+This project is licensed under the MIT License — see the [LICENSE](LICENSE) file for details.
+
+## Disclaimer
+
+This tool is provided for **defensive, authorized security testing only**. Users must have explicit written permission from building owners and facility operators before scanning any network. The authors assume no liability for misuse, service disruption, or compliance gaps. BAS networks are sensitive — coordinate with your facilities team before running any scans.
