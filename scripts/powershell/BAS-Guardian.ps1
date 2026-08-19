@@ -339,4 +339,71 @@ foreach ($subnet in $script:Subnets) {
         }
 
         foreach ($port in $CriticalBASPorts.Keys) {
-            if (Test-Port -IP 
+            if (Test-Port -IP $ip -Port $port -TimeoutMs $script:TimeoutMs) {
+                $protocol = $CriticalBASPorts[$port]
+                Write-Host "  [BAS] ${ip}:${port} - $protocol" -ForegroundColor Magenta
+                $threatKey = $protocol.Split(' ')[0]
+                $threat = $ThreatContext[$threatKey]
+                $script:Findings += [PSCustomObject]@{
+                    IP = $ip; Port = $port; Service = $protocol; Severity = "HIGH"
+                    ThreatContext = $threat; Action = "Remove from internet; segment from IT network; patch bacnet-stack"
+                }
+                $script:HighCount++
+                $subnetFindings++
+            }
+        }
+
+        foreach ($alert in $VendorAlerts) {
+            if (Test-Port -IP $ip -Port $alert.Port -TimeoutMs $script:TimeoutMs) {
+                Write-Host "  [!!! VENDOR CRITICAL !!!] ${ip}:$($alert.Port) - $($alert.Vendor)" -ForegroundColor Red
+                Write-Host "      $($alert.CVE) (CVSS: $($alert.CVSS))" -ForegroundColor Red
+                Write-Host "      $($alert.Description)" -ForegroundColor Red
+                $script:Findings += [PSCustomObject]@{
+                    IP = $ip; Port = $alert.Port; Service = "$($alert.Vendor) BMS Platform"; Severity = "CRITICAL"
+                    ThreatContext = "$($alert.CVE) - $($alert.Description)"; Action = $alert.Action
+                }
+                $script:CriticalCount++
+                $subnetFindings++
+            }
+        }
+    }
+
+    $subnetDuration = [math]::Round(((Get-Date) - $subnetStart).TotalSeconds, 1)
+    Write-Host "  [COMPLETE] $subnetFindings findings in ${subnetDuration}s" -ForegroundColor Green
+}
+
+$script:ScanDuration = [math]::Round(((Get-Date) - $startTime).TotalSeconds, 1)
+
+Clear-Host
+Write-Host "============================================" -ForegroundColor Cyan
+Write-Host "  BAS Guardian v2.0 - Scan Complete" -ForegroundColor Cyan
+Write-Host "============================================" -ForegroundColor Cyan
+Write-Host ""
+Write-Host "Total IPs Scanned: $($script:TotalScanned)"
+Write-Host "Scan Duration: $($script:ScanDuration)s"
+Write-Host ""
+Write-Host "Critical: $($script:CriticalCount)  |  High: $($script:HighCount)  |  Total: $($script:Findings.Count)" -ForegroundColor White
+
+if ($script:Findings.Count -gt 0) {
+    Write-Host ""
+    Write-Host "IMMEDIATE ACTIONS REQUIRED:" -ForegroundColor Red
+    Write-Host "1. Remove BACnet devices from direct internet exposure"
+    Write-Host "2. Implement VPN for all remote BMS/HVAC access (RDP/VNC/SSH)"
+    Write-Host "3. Segment BAS network from corporate IT network"
+    Write-Host "4. If Honeywell IQ4x port reachable: verify web HMI auth is ENABLED (CVE-2026-3611 exposure candidate)"
+    Write-Host "5. If Johnson Controls C-CURE 9000/Victor port reachable: patch immediately (ICSA-26-204-01)"
+    Write-Host "6. If Siemens Desigo CC port reachable: apply patch, review privilege assignments"
+    Write-Host "7. Patch bacnet-stack to 1.4.3+ and monitor CVE-2026-24060 advisories"
+    Write-Host "8. Report suspicious activity to CISA: https://www.cisa.gov/report-cyber-incident"
+
+    if ($script:ExportReport) {
+        $reportFile = Generate-Report
+        Write-Host ""
+        Write-Host "Report saved to: $reportFile" -ForegroundColor Green
+    }
+} else {
+    Write-Host ""
+    Write-Host "No internet-exposed threats detected." -ForegroundColor Green
+}
+
+Write-Host ""
