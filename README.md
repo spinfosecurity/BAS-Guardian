@@ -83,7 +83,7 @@ This tool is built directly on documented 2026 vulnerabilities and CISA advisori
 ## Key Features
 
 ### 🎯 Vendor-Specific Critical Alerts
-BAS Guardian doesn't just scan generic ports — it fingerprints known vendor platforms and cross-references them against active 2026 CVEs, delivering actionable, vendor-specific remediation guidance instead of generic port-scan output.
+BAS Guardian goes beyond generic port scanning — it maps open ports to known vendor-specific exposure patterns and cross-references them against 2026 CVE advisories, delivering actionable, vendor-specific remediation guidance. All findings are **candidates based on TCP port reachability** — no banner parsing or exploit payloads are used.
 
 ### 📡 Protocol Coverage
 | Protocol | Port(s) |
@@ -107,12 +107,12 @@ chmod +x scripts/bash/BAS-Guardian.sh
 ./scripts/bash/BAS-Guardian.sh
 ```
 
-Both versions deliver identical scanning logic, vendor fingerprinting, and reporting — pick whichever matches your OS.
+Both versions deliver identical scanning logic, candidate vendor exposure mapping, and reporting — pick whichever matches your OS.
 
 ## Sample Output
 
 ```text
-[2026-08-03 21:14:02] [CRITICAL] 10.0.5.42:47808  BACnet/IP exposed — Honeywell IQ4x fingerprint detected (CVE-2026-3611, CVSS 10.0)
+[2026-08-03 21:14:02] [CRITICAL] 10.0.5.42:47808  BACnet/IP exposed — CVE-2026-3611 exposure candidate (Honeywell IQ4x port reachable, CVSS 10.0)
 [2026-08-03 21:14:05] [HIGH]     10.0.5.55:1911   Tridium Niagara Fox protocol reachable
 [2026-08-03 21:14:07] [HIGH]     10.0.5.61:3389   RDP exposed on BAS subnet — restrict remote access immediately
 [2026-08-03 21:14:09] [MEDIUM]   10.0.5.70:22     SSH reachable — review access policy
@@ -182,7 +182,7 @@ A: Yes — MIT License.
 
 ## Documentation
 
-Detailed documentation for scan modes, vendor fingerprinting, and report formats will be added to the `docs/` folder in future releases.
+Detailed documentation for scan modes, vendor exposure mapping, and report formats will be added to the `docs/` folder in future releases.
 
 ## Technical Specifications
 

@@ -10,7 +10,7 @@ $ScriptTagline = "BAS Guardian - Protecting Building Automation from Cyber Threa
 $Reference = "CISA ICSA-26-069-03 | ICSA-26-204-01 | CVE-2026-3611 | CVE-2026-24060"
 
 $CriticalBASPorts = @{
-    47808 = "BACnet/IP - Unauthenticated protocol [CVE-2026-24060 ACTIVE]"
+    47808 = "BACnet/IP - Unauthenticated protocol (CVE-2026-24060 exposure candidate)"
     47809 = "BACnet/IP Alternate"
     4800  = "BACnet/SC (Secure Connect) - WebSocket"
     1628  = "LonWorks/LonTalk - Building automation"
@@ -26,7 +26,7 @@ $RemoteAccessPorts = @{
     5900 = "VNC - HVAC controller remote access"
     5901 = "VNC Alternate"
     22   = "SSH - Building controller management"
-    80   = "HTTP (Web BMS/BAS Dashboard) - [Honeywell IQ4x CVE-2026-3611 RISK]"
+    80   = "HTTP (Web BMS/BAS Dashboard) - CVE-2026-3611 exposure candidate (Honeywell IQ4x)"
     443  = "HTTPS (Web BMS/BAS Dashboard)"
     8080 = "HTTP Alternate (Web BMS Dashboard)"
     8443 = "HTTPS Alternate (Web BMS Dashboard)"
@@ -77,13 +77,13 @@ function Show-Intro {
     Write-Host "  + Honeywell IQ4x (CVE-2026-3611, CVSS 10.0) - auth disabled by default"
     Write-Host "  + Johnson Controls C-CURE 9000/Victor (ICSA-26-204-01) - RCE risk"
     Write-Host "  + Siemens Desigo CC/SENTRON Powermanager - privilege escalation"
-    Write-Host "  + Tridium Niagara Framework fingerprinting"
+    Write-Host "  + Tridium Niagara Framework port exposure (candidate)"
     Write-Host ""
     Write-Host "What This Does:" -ForegroundColor White
     Write-Host "  + Scans building automation subnets for exposed BACnet devices"
     Write-Host "  + Detects RDP (3389), VNC (5900), SSH (22) on BMS workstations"
     Write-Host "  + Identifies BACnet/IP (47808), BACnet/SC (4800), LonWorks (1628) exposure"
-    Write-Host "  + Fingerprints vendor-specific BMS platforms (Honeywell, JCI, Siemens, Tridium)"
+    Write-Host "  + Identifies candidate vendor-specific BMS exposure by port (Honeywell, JCI, Siemens, Tridium)"
     Write-Host "  + Flags unauthenticated BACnet traffic vulnerable to CVE-2026-24060"
     Write-Host "  + Prioritizes findings by severity (CRITICAL vs HIGH)"
     Write-Host "  + Generates simple text report (optional)"
@@ -339,4 +339,71 @@ foreach ($subnet in $script:Subnets) {
         }
 
         foreach ($port in $CriticalBASPorts.Keys) {
-            if (Test-Port -IP 
+            if (Test-Port -IP $ip -Port $port -TimeoutMs $script:TimeoutMs) {
+                $protocol = $CriticalBASPorts[$port]
+                Write-Host "  [BAS] ${ip}:${port} - $protocol" -ForegroundColor Magenta
+                $threatKey = $protocol.Split(' ')[0]
+                $threat = $ThreatContext[$threatKey]
+                $script:Findings += [PSCustomObject]@{
+                    IP = $ip; Port = $port; Service = $protocol; Severity = "HIGH"
+                    ThreatContext = $threat; Action = "Remove from internet; segment from IT network; patch bacnet-stack"
+                }
+                $script:HighCount++
+                $subnetFindings++
+            }
+        }
+
+        foreach ($alert in $VendorAlerts) {
+            if (Test-Port -IP $ip -Port $alert.Port -TimeoutMs $script:TimeoutMs) {
+                Write-Host "  [!!! VENDOR CRITICAL !!!] ${ip}:$($alert.Port) - $($alert.Vendor)" -ForegroundColor Red
+                Write-Host "      $($alert.CVE) (CVSS: $($alert.CVSS))" -ForegroundColor Red
+                Write-Host "      $($alert.Description)" -ForegroundColor Red
+                $script:Findings += [PSCustomObject]@{
+                    IP = $ip; Port = $alert.Port; Service = "$($alert.Vendor) BMS Platform"; Severity = "CRITICAL"
+                    ThreatContext = "$($alert.CVE) - $($alert.Description)"; Action = $alert.Action
+                }
+                $script:CriticalCount++
+                $subnetFindings++
+            }
+        }
+    }
+
+    $subnetDuration = [math]::Round(((Get-Date) - $subnetStart).TotalSeconds, 1)
+    Write-Host "  [COMPLETE] $subnetFindings findings in ${subnetDuration}s" -ForegroundColor Green
+}
+
+$script:ScanDuration = [math]::Round(((Get-Date) - $startTime).TotalSeconds, 1)
+
+Clear-Host
+Write-Host "============================================" -ForegroundColor Cyan
+Write-Host "  BAS Guardian v2.0 - Scan Complete" -ForegroundColor Cyan
+Write-Host "============================================" -ForegroundColor Cyan
+Write-Host ""
+Write-Host "Total IPs Scanned: $($script:TotalScanned)"
+Write-Host "Scan Duration: $($script:ScanDuration)s"
+Write-Host ""
+Write-Host "Critical: $($script:CriticalCount)  |  High: $($script:HighCount)  |  Total: $($script:Findings.Count)" -ForegroundColor White
+
+if ($script:Findings.Count -gt 0) {
+    Write-Host ""
+    Write-Host "IMMEDIATE ACTIONS REQUIRED:" -ForegroundColor Red
+    Write-Host "1. Remove BACnet devices from direct internet exposure"
+    Write-Host "2. Implement VPN for all remote BMS/HVAC access (RDP/VNC/SSH)"
+    Write-Host "3. Segment BAS network from corporate IT network"
+    Write-Host "4. If Honeywell IQ4x port reachable: verify web HMI auth is ENABLED (CVE-2026-3611 exposure candidate)"
+    Write-Host "5. If Johnson Controls C-CURE 9000/Victor port reachable: patch immediately (ICSA-26-204-01)"
+    Write-Host "6. If Siemens Desigo CC port reachable: apply patch, review privilege assignments"
+    Write-Host "7. Patch bacnet-stack to 1.4.3+ and monitor CVE-2026-24060 advisories"
+    Write-Host "8. Report suspicious activity to CISA: https://www.cisa.gov/report-cyber-incident"
+
+    if ($script:ExportReport) {
+        $reportFile = Generate-Report
+        Write-Host ""
+        Write-Host "Report saved to: $reportFile" -ForegroundColor Green
+    }
+} else {
+    Write-Host ""
+    Write-Host "No internet-exposed threats detected." -ForegroundColor Green
+}
+
+Write-Host ""
