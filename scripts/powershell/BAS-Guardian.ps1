@@ -10,7 +10,7 @@ $ScriptTagline = "BAS Guardian - Protecting Building Automation from Cyber Threa
 $Reference = "CISA ICSA-26-069-03 | ICSA-26-204-01 | CVE-2026-3611 | CVE-2026-24060"
 
 $CriticalBASPorts = @{
-    47808 = "BACnet/IP - Unauthenticated protocol [CVE-2026-24060 ACTIVE]"
+    47808 = "BACnet/IP - Unauthenticated protocol (CVE-2026-24060 exposure candidate)"
     47809 = "BACnet/IP Alternate"
     4800  = "BACnet/SC (Secure Connect) - WebSocket"
     1628  = "LonWorks/LonTalk - Building automation"
@@ -26,7 +26,7 @@ $RemoteAccessPorts = @{
     5900 = "VNC - HVAC controller remote access"
     5901 = "VNC Alternate"
     22   = "SSH - Building controller management"
-    80   = "HTTP (Web BMS/BAS Dashboard) - [Honeywell IQ4x CVE-2026-3611 RISK]"
+    80   = "HTTP (Web BMS/BAS Dashboard) - CVE-2026-3611 exposure candidate (Honeywell IQ4x)"
     443  = "HTTPS (Web BMS/BAS Dashboard)"
     8080 = "HTTP Alternate (Web BMS Dashboard)"
     8443 = "HTTPS Alternate (Web BMS Dashboard)"
@@ -77,13 +77,13 @@ function Show-Intro {
     Write-Host "  + Honeywell IQ4x (CVE-2026-3611, CVSS 10.0) - auth disabled by default"
     Write-Host "  + Johnson Controls C-CURE 9000/Victor (ICSA-26-204-01) - RCE risk"
     Write-Host "  + Siemens Desigo CC/SENTRON Powermanager - privilege escalation"
-    Write-Host "  + Tridium Niagara Framework fingerprinting"
+    Write-Host "  + Tridium Niagara Framework port exposure (candidate)"
     Write-Host ""
     Write-Host "What This Does:" -ForegroundColor White
     Write-Host "  + Scans building automation subnets for exposed BACnet devices"
     Write-Host "  + Detects RDP (3389), VNC (5900), SSH (22) on BMS workstations"
     Write-Host "  + Identifies BACnet/IP (47808), BACnet/SC (4800), LonWorks (1628) exposure"
-    Write-Host "  + Fingerprints vendor-specific BMS platforms (Honeywell, JCI, Siemens, Tridium)"
+    Write-Host "  + Identifies candidate vendor-specific BMS exposure by port (Honeywell, JCI, Siemens, Tridium)"
     Write-Host "  + Flags unauthenticated BACnet traffic vulnerable to CVE-2026-24060"
     Write-Host "  + Prioritizes findings by severity (CRITICAL vs HIGH)"
     Write-Host "  + Generates simple text report (optional)"

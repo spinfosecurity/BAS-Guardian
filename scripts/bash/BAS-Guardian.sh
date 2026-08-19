@@ -11,7 +11,7 @@ SCRIPT_TAGLINE="BAS Guardian - Protecting Building Automation from Cyber Threats
 REFERENCE="CISA ICSA-26-069-03 | ICSA-26-204-01 | CVE-2026-3611 | CVE-2026-24060"
 
 declare -A CRITICAL_BAS_PORTS=(
-    [47808]="BACnet/IP - Unauthenticated protocol [CVE-2026-24060 ACTIVE]"
+    [47808]="BACnet/IP - Unauthenticated protocol (CVE-2026-24060 exposure candidate)"
     [47809]="BACnet/IP Alternate"
     [4800]="BACnet/SC (Secure Connect) - WebSocket"
     [1628]="LonWorks/LonTalk - Building automation"
@@ -47,7 +47,7 @@ declare -A THREAT_CONTEXT=(
     ["Siemens"]="Desigo CC / SENTRON Powermanager: least-privilege violation enables privilege escalation (versions 5-8 affected)"
 )
 
-# Vendor-specific critical alert ports (fingerprinting)
+# Vendor-specific critical alert ports (candidate exposure by port reachability)
 declare -A VENDOR_ALERT_PORTS=(
     [5489]="Honeywell|CVE-2026-3611|10.0 CRITICAL|IQ4x BMS Controller ships with web HMI authentication disabled by factory default|IMMEDIATELY enable authentication; verify not internet-facing; check for unauthorized admin accounts"
     [5010]="Johnson Controls|ICSA-26-204-01|High|C-CURE 9000 / Victor application server remote code execution via network access|Patch to latest version immediately; restrict network access to management VLAN only"
@@ -98,7 +98,7 @@ show_intro() {
     echo "  + Honeywell IQ4x (CVE-2026-3611, CVSS 10.0) - auth disabled by default"
     echo "  + Johnson Controls C-CURE 9000/Victor (ICSA-26-204-01) - RCE risk"
     echo "  + Siemens Desigo CC/SENTRON Powermanager - privilege escalation"
-    echo "  + Tridium Niagara Framework fingerprinting"
+    echo "  + Tridium Niagara Framework port exposure (candidate)"
     echo ""
     echo "What This Does:"
     echo "  + Scans building automation subnets for exposed BACnet devices"
