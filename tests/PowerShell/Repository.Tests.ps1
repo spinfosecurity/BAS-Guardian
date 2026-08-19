@@ -1,18 +1,21 @@
 BeforeAll {
     $script:Root = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-    $script:ScriptFiles = @(Get-ChildItem -Path (Join-Path $script:Root 'scripts') -Filter '*.ps1' -Recurse)
 }
 
 Describe 'BAS-Guardian repository' {
     It 'contains at least one PowerShell scanner file' {
-        $script:ScriptFiles.Count | Should -BeGreaterThan 0
+        $files = @(Get-ChildItem -Path (Join-Path $script:Root 'scripts') -Filter '*.ps1' -Recurse)
+        $files.Count | Should -BeGreaterThan 0
     }
 
-    It 'has PowerShell scanner files that parse without errors' -ForEach $script:ScriptFiles {
-        $tokens = $null
-        $errors = $null
-        [void][System.Management.Automation.Language.Parser]::ParseFile($_.FullName, [ref]$tokens, [ref]$errors)
-        $errors.Count | Should -Be 0
+    It 'has PowerShell scanner files that parse without errors' {
+        $files = @(Get-ChildItem -Path (Join-Path $script:Root 'scripts') -Filter '*.ps1' -Recurse)
+        foreach ($file in $files) {
+            $tokens = $null
+            $errors = $null
+            [void][System.Management.Automation.Language.Parser]::ParseFile($file.FullName, [ref]$tokens, [ref]$errors)
+            $errors.Count | Should -Be 0 -Because "Parse errors found in $($file.Name)"
+        }
     }
 
     It 'contains required governance and safety documentation' {
